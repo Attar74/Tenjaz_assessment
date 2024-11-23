@@ -2,7 +2,7 @@
 
 This template should help get you started developing with Vue 3 in Vite.
 
-preview link: https://tenjaz-assessment.vercel.app/dashboard
+preview link: https://tenjaz-assessment.vercel.app/
 
 ## Recommended IDE Setup
 
