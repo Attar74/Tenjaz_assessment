@@ -13,7 +13,7 @@
     <button
       v-for="page in visiblePages"
       :key="page"
-      @click="page !== 0 && goToPage(page)"
+      @click="goToPage(page)"
       :class="[
         'px-3 py-1 rounded',
         page === currentPage
@@ -22,7 +22,7 @@
           ? 'bg-transparent text-gray-500'
           : 'bg-gray-300 hover:bg-gray-400',
       ]"
-      :disabled="page === 0"
+      :disabled="page === 0 || page == currentPage"
     >
       {{ !!page ? page : '...' }}
     </button>

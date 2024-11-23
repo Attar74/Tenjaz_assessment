@@ -5,7 +5,7 @@
       v-if="props.isModalOpen"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     >
-      <div class="bg-white p-6 rounded-lg shadow-lg w-80">
+      <div class="bg-white p-6 rounded-lg shadow-lg w-120">
         <h2 class="text-lg font-bold text-gray-800 mb-4">{{ title }}</h2>
         <p class="text-gray-600 mb-6">
           {{ confirmMessage }}
@@ -31,8 +31,6 @@
   </transition>
 </template>
 <script setup>
-import { ref } from 'vue';
-
 const props = defineProps({
   isModalOpen: {
     default: false,

@@ -1,7 +1,7 @@
 <template>
   <aside class="flex flex-shrink-0 h-[99vh]">
     <div
-      class="z-20 flex-col flex-shrink-0 py-4 bg-white flex border-gray-200 transform transition-all duration-300 border-r pr-3"
+      class="z-50 flex-col flex-shrink-0 py-4 bg-white flex border-gray-200 transform transition-all duration-300 border-r pr-3"
       :class="[isCollapsed ? 'w-44' : 'w-[4.5rem]']"
     >
       <div class="flex flex-col flex-1 gap-y-2">
@@ -60,10 +60,19 @@
   </aside>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
 import dashboard from '../../assets/svgs/dashboard.vue';
 import users from '../../assets/svgs/users.vue';
+
+const isLgOrSmall = ref(false);
+
+// Function to check if screen size is medium
+const checkScreenSize = () => {
+  isLgOrSmall.value = window.matchMedia('(max-width: 1024px)').matches;
+
+  isCollapsed.value = !isLgOrSmall.value;
+};
 
 const route = useRoute();
 
@@ -87,4 +96,13 @@ const DrawerOptions = ref([
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value;
 };
+
+onMounted(() => {
+  checkScreenSize(); // Initial check
+  window.addEventListener('resize', checkScreenSize); // Watch for changes
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkScreenSize); // Clean up event listener
+});
 </script>

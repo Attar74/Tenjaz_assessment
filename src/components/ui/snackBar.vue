@@ -1,16 +1,16 @@
 <template>
-  <div
-    :class="[
-      'fixed top-16 right-1/2 bg-gray-800 text-white py-2 px-4 rounded shadow-md transition-opacity duration-300',
-      visible ? 'opacity-100' : 'opacity-0',
-    ]"
-  >
-    {{ message }}
-  </div>
+  <transition name="fade">
+    <div
+      v-if="props.isVisible"
+      class="fixed top-[6rem] right-[3rem] bg-gray-800 text-white py-2 px-4 rounded shadow-md transition-opacity duration-300"
+    >
+      {{ message }}
+    </div>
+  </transition>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { onUnmounted, watch, computed } from 'vue';
 
 // Props
 const props = defineProps({
@@ -29,15 +29,16 @@ const props = defineProps({
 });
 
 const emits = defineEmits(['update:isVisible']);
+const isVisible = computed(() => props.isVisible);
 
-// State
-const visible = ref(props.isVisible);
+watch(isVisible, () => {
+  hideSnackbar();
+});
+
 let timeout: ReturnType<typeof setTimeout> | null = null;
 
 // Show the snackbar
-const showSnackbar = () => {
-  visible.value = true;
-
+const hideSnackbar = () => {
   // Automatically hide after the duration
   timeout = setTimeout(() => {
     emits('update:isVisible', false);
@@ -50,13 +51,4 @@ onUnmounted(() => {
     clearTimeout(timeout);
   }
 });
-
-// Show snackbar when mounted
-onMounted(() => {
-  showSnackbar();
-});
 </script>
-
-<style>
-/* Optional custom styling */
-</style>

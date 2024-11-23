@@ -5,7 +5,7 @@
       <div class="default-sidebar sticky top-0">
         <BaseSideBar />
       </div>
-      <main class="flex p-[5rem] w-full">
+      <main class="flex p-[3rem] xl:p-[5rem] w-full">
         <RouterView class="mx-auto" />
       </main>
     </div>

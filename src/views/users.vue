@@ -1,5 +1,5 @@
 <template>
-  <div class="container mx-auto md:w-[80rem]">
+  <div class="container mx-auto">
     <div class="flex items-center justify-between mb-3">
       <h1 class="text-2xl font-bold text-gray-700">Users Table</h1>
       <div class="flex justify-start gap-x-10">
@@ -37,60 +37,12 @@
     </div>
     <!-- Users Table -->
     <Loader v-if="isPageLoading" />
-    <div
-      class="overflow-x-auto bg-white shadow rounded-lg"
+    <UsersTable
       v-else-if="users.length"
-    >
-      <table class="w-full table-auto border-collapse">
-        <!-- Table Header -->
-        <thead class="bg-gray-200 text-gray-600 uppercase text-sm">
-          <tr class="cursor-pointer">
-            <th class="p-3 text-left">Name</th>
-            <th class="p-3 text-left">Email</th>
-            <th class="p-3 text-left">Phone</th>
-            <!-- <th class="p-3 text-left">Status</th> -->
-            <th class="p-3 text-center">Actions</th>
-          </tr>
-        </thead>
-        <!-- Table Body -->
-        <tbody class="text-gray-700">
-          <!-- Row 1 -->
-          <tr
-            class="border-b hover:bg-gray-100 cursor-pointer"
-            v-for="user in users"
-            :key="user.id"
-          >
-            <td class="p-3">{{ user.firstName }} {{ user.lastName }}</td>
-            <td class="p-3">{{ user.email }}</td>
-            <td class="p-3">{{ user.phone }}</td>
-            <!-- <td class="p-3">
-              <p
-                class="text-[#fff] rounded-md py-1 px-2 text-center"
-                :class="
-                  user.status === 'Active' ? 'bg-green-500' : 'bg-red-500'
-                "
-              >
-                {{ user.status }}
-              </p>
-            </td> -->
-            <td class="p-3 text-center flex flex-col lg:flex-row gap-y-5">
-              <button
-                @click="openUpdateModal(user)"
-                class="bg-blue-500 text-white px-5 py-1 rounded hover:bg-blue-600 mr-2"
-              >
-                Edit
-              </button>
-              <button
-                @click="openDeleteModal(user.id)"
-                class="bg-red-500 text-white px-5 py-1 rounded hover:bg-red-600"
-              >
-                Delete
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+      :users="users"
+      @updateModal="openUpdateModal"
+      @deleteModal="openDeleteModal"
+    />
     <div v-else class="text-center h-[50vh] flex items-center justify-center">
       <p class="text-3xl">
         Ooops, No Users match
@@ -124,7 +76,6 @@
       @cancel="closeModals"
     />
     <SnackBar
-      v-if="snackbarVisible"
       :isVisible="snackbarVisible"
       :message="snackbarMessage"
       :duration="3000"
@@ -133,20 +84,22 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { onMounted } from 'vue'; // Ensure this line is present
-import { ref, nextTick, computed, watch } from 'vue';
+import { ref, nextTick, watch } from 'vue';
+import UsersTable from '../components/ui/usersTable.vue';
 import ConfirmModal from '../components/modals/confirmDelete.vue';
 import EditModal from '../components/modals/editModal.vue';
 import SnackBar from '../components/ui/snackBar.vue';
 import Loader from '../components/ui/Loader.vue';
 import Pagination from '../components/helper/pagination.vue';
+import type { User } from '../interfaces/User';
 import { generateQueryString } from '../utils/queryUtils';
 import { userService } from '../services/user.service.ts';
 
 const isModalOpen = ref(false);
 const isUpdateModalOpen = ref(false);
-const users = ref([]);
+const users = ref<User[]>([]);
 const filters = ref({
   searchTerm: '',
 });
@@ -162,15 +115,18 @@ const pagination = ref({
 
 const isPageLoading = ref(true);
 
-const idToBeDeleted = ref('');
+const idToBeDeleted = ref<number | null>(null);
 const userToBeUpdates = ref({});
 
-const handlePageClick = (page) => {
+const handlePageClick = (page: number) => {
   pagination.value.skip = page - 1;
   fetchUsers();
 };
 
 const handleDelete = async () => {
+  if (!idToBeDeleted.value) {
+    return;
+  }
   try {
     users.value = users.value.filter((user) => user.id !== idToBeDeleted.value);
     await userService.deleteUser(idToBeDeleted.value);
@@ -178,12 +134,12 @@ const handleDelete = async () => {
     snackbarMessage.value = 'User Deleted Successfully';
   } catch {
   } finally {
-    idToBeDeleted.value = '';
+    idToBeDeleted.value = null;
     !users.value.length && fetchUsers();
   }
 };
 
-const handleUpdate = async (user) => {
+const handleUpdate = async (user: User) => {
   try {
     await userService.updateUser(user.id, generateQueryString(user));
     snackbarVisible.value = true;
@@ -193,21 +149,21 @@ const handleUpdate = async (user) => {
     userToBeUpdates.value = Object.assign({});
   }
 };
-const openUpdateModal = (user) => {
+const openUpdateModal = (user: User) => {
   userToBeUpdates.value = JSON.parse(JSON.stringify(user));
   isUpdateModalOpen.value = true;
 };
 
-const openDeleteModal = (id) => {
+const openDeleteModal = (id: number) => {
   idToBeDeleted.value = id;
   isModalOpen.value = true;
 };
 
-const closeModals = (value) => {
+const closeModals = () => {
   isModalOpen.value = false;
   isUpdateModalOpen.value = false;
   userToBeUpdates.value = {};
-  idToBeDeleted.value = '';
+  idToBeDeleted.value = null;
 };
 
 watch(
@@ -229,7 +185,22 @@ const fetchUsers = async () => {
       !!filters.value.searchTerm
     );
     users.value = data.users.map(
-      ({ email, phone, firstName, lastName, id }, index) => {
+      (
+        {
+          email,
+          phone,
+          firstName,
+          lastName,
+          id,
+        }: {
+          email: string;
+          phone: string;
+          firstName: string;
+          lastName: string;
+          id: number;
+        },
+        index: number
+      ) => {
         return {
           email,
           phone,
