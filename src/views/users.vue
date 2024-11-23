@@ -95,7 +95,7 @@ import Loader from '../components/ui/Loader.vue';
 import Pagination from '../components/helper/pagination.vue';
 import type { User } from '../interfaces/User';
 import { generateQueryString } from '../utils/queryUtils';
-import { userService } from '../services/user.service.ts';
+import { userService } from '../services/user.service';
 
 const isModalOpen = ref(false);
 const isUpdateModalOpen = ref(false);
