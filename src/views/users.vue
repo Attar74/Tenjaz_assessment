@@ -174,7 +174,7 @@ watch(
     timeout && clearTimeout(timeout);
     timeout = setTimeout(() => {
       fetchUsers();
-    }, 800);
+    }, 500);
   }
 );
 
