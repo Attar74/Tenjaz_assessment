@@ -166,10 +166,15 @@ const closeModals = () => {
   idToBeDeleted.value = null;
 };
 
+let timeout: NodeJS.Timeout | null = null;
+
 watch(
   () => filters.value.searchTerm,
-  (val) => {
-    fetchUsers();
+  () => {
+    timeout && clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      fetchUsers();
+    }, 800);
   }
 );
 
